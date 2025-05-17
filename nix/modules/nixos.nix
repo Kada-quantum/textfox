@@ -1,11 +1,9 @@
-inputs:
-{
+inputs: {
   config,
   lib,
   pkgs,
   ...
-}:
-let
+}: let
   inherit (lib.options) mkOption mkPackageOption;
   inherit (lib.modules) mkIf;
   inherit (lib.attrsets) optionalAttrs;
@@ -16,22 +14,21 @@ let
   wrapTextfox = inputs.self.packages.${system}.wrapTextfox;
 
   cfg = config.textfox;
-in
-{
-  imports = [ ./options.nix ];
+in {
+  imports = [./options.nix];
 
   options.textfox = {
-    package = mkPackageOption pkgs "firefox-unwrapped" { };
+    package = mkPackageOption pkgs "firefox-unwrapped" {};
 
     extraPoliciesFiles = mkOption {
       type = listOf path;
-      default = [ ];
+      default = [];
       description = "Custom policy.json files passed; see 'about:policies'.";
     };
 
     extraPrefsFiles = mkOption {
       type = listOf path;
-      default = [ ];
+      default = [];
       description = "Custom autoconfig.js files passed";
     };
 
@@ -49,32 +46,26 @@ in
   };
 
   config = mkIf cfg.enable {
-    environment.systemPackages =
-      let
-        preferences =
-          let
-            icons = config.textfox.config.icons;
-          in
-          ''
-            pref("shyfox.enable.ext.mono.toolbar.icons", ${boolToString icons.toolbar.extensions.enable});
-            pref("shyfox.enable.ext.mono.context.icons", ${boolToString icons.context.extensions.enable});
-            pref("shyfox.enable.context.menu.icons", ${boolToString icons.context.firefox.enable});
-          '';
+    programs.firefox.package = let
+      preferences = let
+        icons = config.textfox.config.icons;
+      in ''
+        pref("shyfox.enable.ext.mono.toolbar.icons", ${boolToString icons.toolbar.extensions.enable});
+        pref("shyfox.enable.ext.mono.context.icons", ${boolToString icons.context.extensions.enable});
+        pref("shyfox.enable.context.menu.icons", ${boolToString icons.context.firefox.enable});
+      '';
+    in (wrapTextfox cfg.package {
+      inherit
+        (cfg)
+        extraPoliciesFiles
+        extraPrefsFiles
+        extraUserChrome
+        extraUserContent
+        configCss
+        ;
 
-      in
-      [
-        (wrapTextfox cfg.package {
-          inherit (cfg)
-            extraPoliciesFiles
-            extraPrefsFiles
-            extraUserChrome
-            extraUserContent
-            configCss
-            ;
-
-          extraPolicies = policies;
-          extraPrefs = preferences;
-        })
-      ];
+      extraPolicies = {};
+      extraPrefs = preferences;
+    });
   };
 }
