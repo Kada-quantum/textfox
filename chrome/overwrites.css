@@ -1,5 +1,5 @@
 :root {
-  --toolbar-color: currentColor !important;
+  --toolbar-color: --tf-bg !important;
   --link-color: var(--tf-accent) !important;
   --urlbarView-highlight-background: var(
     --toolbar-field-background-color
@@ -19,12 +19,12 @@
   --tab-selected-bgcolor: color-mix(
     in hsl,
     var(--toolbar-field-color) 8%,
-    var(--toolbar-bgcolor)
+    var(--tf-bg)
   ) !important;
   --tab-hover-background-color: color-mix(
     in hsl,
     var(--toolbar-field-color) 4%,
-    var(--toolbar-bgcolor)
+    var(--tf-bg)
   ) !important;
   --tab-min-height: 29px !important;
 
